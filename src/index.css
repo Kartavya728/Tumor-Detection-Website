@@ -1,13 +1,183 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  background-color: #0a0f1e; /* Dark blue, almost black */
+  color: #ffffff; /* White text */
+  font-family: 'Poppins', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.5s ease-in-out;
 }
 
+/* Smooth Fade-in Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  animation: fadeIn 1s ease-in-out;
+}
+
+p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  font-family: 'Lora', serif;
+  animation: fadeIn 1s ease-in-out;
+}
+
+/* Stylish Code Block */
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: all 0.3s ease-in-out;
+}
+
+code:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Button Styling */
+button {
+  background: #1e3a8a; /* Dark blue */
+  color: white;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+button:hover {
+  background: #2563eb; /* Lighter blue */
+  transform: scale(1.05);
+}
+
+button:active {
+  transform: scale(0.95);
+}
+.heading-container {
+  text-align: center;
+  padding: 50px 20px;
+  background: linear-gradient(135deg, #0a0f1e, #1a2a4e); /* Dark Tech Gradient */
+  color: #ffffff;
+  border-radius: 10px;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.heading-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #4facfe, #00f2fe); /* Neon Glow Effect */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: glow 1.5s infinite alternate;
+}
+
+.heading-subtitle {
+  font-size: 1.2rem;
+  font-weight: 400;
+  max-width: 600px;
+  margin: auto;
+  opacity: 0.9;
+}
+
+.heading-subtitle span {
+  color: #00f2fe;
+  font-weight: bold;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 10px #4facfe, 0 0 20px #00f2fe;
+  }
+  to {
+    text-shadow: 0 0 15px #00f2fe, 0 0 30px #4facfe;
+  }
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.image-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.image-box {
+  width: 250px;
+  height: 250px;
+  border: 2px dashed #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.placeholder-text {
+  color: #777;
+  font-size: 14px;
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+}
+
+.upload-button, .submit-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.upload-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.submit-button {
+  background-color: #28a745;
+  color: white;
 }
