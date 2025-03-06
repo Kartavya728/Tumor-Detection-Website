@@ -1,5 +1,5 @@
 # 🧠 Tumor Detection Web App  
-![Tumor Detection](https://media.giphy.com/media/3o6ZsY8ReZpDz2c7ug/giphy.gif)  
+![Tumor Detection]([https://media.giphy.com/media/3o6ZsY8ReZpDz2c7ug/giphy.gif](https://www.nickmez.com/assets/btd.gif))  
 
 🚀 **An AI-powered web app that detects brain tumors from MRI scans** using a **custom-trained YOLO model**.  
 📸 **Upload an image → Get results with probability & bounding boxes**!  
@@ -19,9 +19,6 @@
 🔹 **Step 1:** Upload an MRI Scan  
 🔹 **Step 2:** Click **"Process"** to detect tumor  
 🔹 **Step 3:** View detected tumor with probability %  
-
-📌 **Example Output:**  
-![Detection Output](https://media.giphy.com/media/l0Exk8EUzSLsrErEQ/giphy.gif)  
 
 ---
 
