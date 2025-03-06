@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory, send_file
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import os
 from ultralytics import YOLO
@@ -6,7 +6,7 @@ from ultralytics import YOLO
 app = Flask(__name__)
 CORS(app)
 
-# Create necessary folders if they don't exist
+# Create necessary folders
 UPLOAD_FOLDER = "uploads"
 PROCESSED_FOLDER = "processed"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -16,7 +16,7 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["PROCESSED_FOLDER"] = PROCESSED_FOLDER
 
 # Load YOLO model
-model_path = r"D:\GenAI projects\tumor-detect\Backend\best.pt"  # Update with your model path
+model_path = r"F:\GenAI projects\tumor-detect\Backend\best.pt"  # Update this with your actual model path
 if not os.path.exists(model_path):
     raise FileNotFoundError(f"YOLO model file not found at {model_path}")
 
@@ -31,15 +31,15 @@ def upload_file():
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
 
-    # Save the uploaded file
+    # Save uploaded file
     file_path = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
     file.save(file_path)
     print(f"Uploaded file saved at: {file_path}")
 
     try:
-        # Process the image using YOLO
+        # Process image with YOLO
         results = model(file_path, conf=0.25)
-        
+
         if not results or len(results[0]) == 0:
             return jsonify({"error": "YOLO processing failed or no detection found"}), 500
 
@@ -50,10 +50,9 @@ def upload_file():
         # Save processed image
         results[0].save(filename=processed_file_path)
 
-        # Return the processed image URL
         return jsonify({
             "message": "File processed successfully",
-            "processed_image": f"/processed/{processed_filename}"
+            "processed_image": f"http://localhost:5000/processed/{processed_filename}"
         })
 
     except Exception as e:
@@ -64,8 +63,9 @@ def upload_file():
 def get_processed_image(filename):
     file_path = os.path.join(app.config["PROCESSED_FOLDER"], filename)
     if os.path.exists(file_path):
-        return send_file(file_path, mimetype="image/png")  # Adjust mimetype if needed
+        return send_file(file_path, mimetype="image/png")
     return jsonify({"error": "File not found"}), 404
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)  # Set debug=False to prevent unnecessary restarts
+

@@ -1,19 +1,15 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 
-function VideoUpload() {
-  const [video, setVideo] = useState(null);
+function ImageUpload() {
   const [file, setFile] = useState(null);
-  const [processedFrames, setProcessedFrames] = useState([]);
+  const [processedImage, setProcessedImage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const videoRef = useRef(null);
-  const canvasRef = useRef(document.createElement("canvas"));
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
-      setVideo(URL.createObjectURL(selectedFile));
       setError("");
     }
   };
@@ -22,74 +18,63 @@ function VideoUpload() {
     document.getElementById("fileInput").click();
   };
 
-  const extractAndProcessFrames = async () => {
+  const sendImageToBackend = async () => {
     if (!file) {
-      setError("Please upload a video first.");
+      setError("Please select an image first.");
       return;
     }
 
     setLoading(true);
     setError("");
-    setProcessedFrames([]);
-    
-    const videoElement = videoRef.current;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    videoElement.crossOrigin = "anonymous";
-    
-    videoElement.onloadeddata = async () => {
-      canvas.width = videoElement.videoWidth;
-      canvas.height = videoElement.videoHeight;
-      const frameInterval = 1000 / 5; // Process 5 frames per second
+    setProcessedImage("");
 
-      for (let time = 0; time < videoElement.duration; time += frameInterval / 1000) {
-        await new Promise((resolve) => {
-          videoElement.currentTime = time;
-          videoElement.onseeked = async () => {
-            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-            const frameData = canvas.toDataURL("image/jpeg");
-            await sendFrameToBackend(frameData);
-            resolve();
-          };
-        });
-      }
-      setLoading(false);
-    };
-  };
+    const formData = new FormData();
+    formData.append("image", file);
 
-  const sendFrameToBackend = async (frameData) => {
     try {
-      const response = await fetch("http://localhost:5000/process_frame", {
+      const response = await fetch("http://localhost:5000/upload", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ frame: frameData })
+        body: formData,
       });
 
-      if (!response.ok) throw new Error("Failed to process frame");
-      const result = await response.json();
-      setProcessedFrames((prevFrames) => [...prevFrames, result.processed_frame]);
+      if (!response.ok) {
+        throw new Error("Failed to process image.");
+      }
+
+      const data = await response.json();
+      setProcessedImage(data.processed_image);
     } catch (error) {
-      setError("Frame processing failed: " + error.message);
+      setError("Error uploading image: " + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="container">
-      <h2>Upload & Process Video</h2>
-      <video ref={videoRef} src={video} controls className="video-preview" />
-      <input type="file" id="fileInput" accept="video/*" onChange={handleFileChange} className="hidden" />
-      <button onClick={handleUploadClick} className="upload-button">Upload Video</button>
-      <button onClick={extractAndProcessFrames} className="process-button" disabled={loading}>
-        {loading ? "Processing..." : "Process"}
+      <h2>Upload & Process Image</h2>
+      <input
+        type="file"
+        id="fileInput"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+      <button onClick={handleUploadClick} className="upload-button">
+        Select Image
+      </button>
+      <button onClick={sendImageToBackend} className="process-button" disabled={loading}>
+        {loading ? "Processing..." : "Process Image"}
       </button>
       {error && <p className="error-message">{error}</p>}
-      <div className="frames-container">
-        {processedFrames.map((frame, index) => (
-          <img key={index} src={frame} alt={`Processed Frame ${index}`} className="processed-frame" />
-        ))}
-      </div>
+      {processedImage && (
+        <div>
+          <h3>Processed Image</h3>
+          <img src={processedImage} alt="Processed" className="processed-image" />
+        </div>
+      )}
     </div>
   );
 }
 
-export default VideoUpload;
+export default ImageUpload;
