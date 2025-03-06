@@ -1,15 +1,19 @@
 import React, { useState } from "react";
 
 function ImageUpload() {
+  const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
-  const [processedImage, setProcessedImage] = useState("");
+  const [processedImage, setProcessedImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const backendUrl = "http://localhost:5000"; // Ensure this matches your backend
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
+      setImage(URL.createObjectURL(selectedFile));
       setError("");
     }
   };
@@ -20,31 +24,37 @@ function ImageUpload() {
 
   const sendImageToBackend = async () => {
     if (!file) {
-      setError("Please select an image first.");
+      setError("Please upload an image first.");
       return;
     }
-
     setLoading(true);
     setError("");
-    setProcessedImage("");
 
     const formData = new FormData();
     formData.append("image", file);
 
     try {
-      const response = await fetch("http://localhost:5000/upload", {
+      const response = await fetch(`${backendUrl}/upload`, {
         method: "POST",
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error("Failed to process image.");
+        const errorData = await response.json();
+        throw new Error(`Failed to process image: ${errorData.error || response.statusText}`);
       }
 
-      const data = await response.json();
-      setProcessedImage(data.processed_image);
+      const result = await response.json();
+      console.log("Processed Image Response:", result);
+
+      if (result.processed_image) {
+        const imageUrl = `${backendUrl}${result.processed_image}?t=${Date.now()}`;
+        setProcessedImage(imageUrl);
+      } else {
+        throw new Error("Processing failed, no image returned.");
+      }
     } catch (error) {
-      setError("Error uploading image: " + error.message);
+      setError("Image processing failed: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -53,6 +63,16 @@ function ImageUpload() {
   return (
     <div className="container">
       <h2>Upload & Process Image</h2>
+
+      {image && (
+        <img
+          src={image}
+          alt="Uploaded"
+          className="image-preview"
+          style={{ maxWidth: "300px", display: "block" }}
+        />
+      )}
+
       <input
         type="file"
         id="fileInput"
@@ -60,17 +80,33 @@ function ImageUpload() {
         onChange={handleFileChange}
         className="hidden"
       />
+
       <button onClick={handleUploadClick} className="upload-button">
-        Select Image
+        Upload Image
       </button>
-      <button onClick={sendImageToBackend} className="process-button" disabled={loading}>
-        {loading ? "Processing..." : "Process Image"}
+      <button
+        onClick={sendImageToBackend}
+        className="process-button"
+        disabled={loading}
+      >
+        {loading ? "Processing..." : "Process"}
       </button>
-      {error && <p className="error-message">{error}</p>}
+
+      {error && (
+        <p className="error-message" style={{ color: "red" }}>
+          {error}
+        </p>
+      )}
+
       {processedImage && (
         <div>
-          <h3>Processed Image</h3>
-          <img src={processedImage} alt="Processed" className="processed-image" />
+          <h3>Processed Image:</h3>
+          <img
+            src={processedImage}
+            alt="Processed"
+            className="processed-image"
+            style={{ maxWidth: "300px", display: "block" }}
+          />
         </div>
       )}
     </div>

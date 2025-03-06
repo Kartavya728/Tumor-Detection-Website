@@ -1,26 +1,19 @@
-from flask import Flask, request, jsonify, send_file
-from flask_cors import CORS
+from flask import Flask, request, jsonify, send_from_directory
 import os
-from ultralytics import YOLO
+from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # Allow all origins
 
-# Create necessary folders
 UPLOAD_FOLDER = "uploads"
 PROCESSED_FOLDER = "processed"
+
+# Ensure the folders exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["PROCESSED_FOLDER"] = PROCESSED_FOLDER
-
-# Load YOLO model
-model_path = r"F:\GenAI projects\tumor-detect\Backend\best.pt"  # Update this with your actual model path
-if not os.path.exists(model_path):
-    raise FileNotFoundError(f"YOLO model file not found at {model_path}")
-
-model = YOLO(model_path)
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
@@ -28,44 +21,25 @@ def upload_file():
         return jsonify({"error": "No file part"}), 400
 
     file = request.files["image"]
+
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
 
-    # Save uploaded file
-    file_path = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
-    file.save(file_path)
-    print(f"Uploaded file saved at: {file_path}")
+    filename = file.filename
+    save_path = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(save_path)
 
-    try:
-        # Process image with YOLO
-        results = model(file_path, conf=0.25)
+    # Simulate processing (rename and save to processed folder)
+    processed_filename = f"processed_{filename}"
+    processed_path = os.path.join(PROCESSED_FOLDER, processed_filename)
+    os.rename(save_path, processed_path)
 
-        if not results or len(results[0]) == 0:
-            return jsonify({"error": "YOLO processing failed or no detection found"}), 500
-
-        processed_filename = "processed_" + file.filename
-        processed_file_path = os.path.join(app.config["PROCESSED_FOLDER"], processed_filename)
-        print(f"Saving processed image at: {processed_file_path}")
-
-        # Save processed image
-        results[0].save(filename=processed_file_path)
-
-        return jsonify({
-            "message": "File processed successfully",
-            "processed_image": f"http://localhost:5000/processed/{processed_filename}"
-        })
-
-    except Exception as e:
-        print(f"Error processing image: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    return jsonify({"processed_image": f"/processed/{processed_filename}"}), 200
 
 @app.route("/processed/<filename>")
 def get_processed_image(filename):
-    file_path = os.path.join(app.config["PROCESSED_FOLDER"], filename)
-    if os.path.exists(file_path):
-        return send_file(file_path, mimetype="image/png")
-    return jsonify({"error": "File not found"}), 404
+    """Serve processed images."""
+    return send_from_directory(PROCESSED_FOLDER, filename)
 
 if __name__ == "__main__":
-    app.run(debug=False)  # Set debug=False to prevent unnecessary restarts
-
+    app.run(host="0.0.0.0", port=5000, debug=True)
